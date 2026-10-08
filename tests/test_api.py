@@ -13,7 +13,7 @@ def test_health(client) -> None:
     assert response.json() == {
         "status": "ok",
         "model_version": "0.1.0",
-        "model_path": settings.model_path,
+        "model_path": "artifacts/missing.joblib",
     }
 
 

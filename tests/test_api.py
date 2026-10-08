@@ -3,7 +3,6 @@
 from fastapi.testclient import TestClient
 
 from what_s_price import db
-from what_s_price.config import settings
 from what_s_price.service.app import app
 
 

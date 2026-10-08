@@ -1,7 +1,7 @@
 name: ci
 
 on:
-  push: {branches: [main]}
+  push: {branches: [main, develop]}
   pull_request:
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
 
   build:
     needs: tests
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions: {contents: read, packages: write}
     steps:

@@ -28,9 +28,9 @@ Compose запускает API и PostgreSQL. Таблица `predictions` хр�
 
 ## CI для ДЗ2
 
-Pull request запускает `ruff` и `pytest` с PostgreSQL. После попадания в `main`
-пайплайн также собирает образ `ghcr.io/mr-nick14/what-s-price:sha-<commit>` и
-проверяет его в `kind`. Для деплоя нужен секрет репозитория `DB_PASSWORD`:
+Pull request запускает `ruff` и `pytest` с PostgreSQL. Push в `develop` или `main`
+также собирает образ с тегом `sha-<commit>` в GHCR и проверяет его в `kind`.
+Для деплоя нужен секрет репозитория `DB_PASSWORD`:
 GitHub → Settings → Secrets and variables → Actions. Используйте пароль без
 символов, требующих кодирования в URL.
 

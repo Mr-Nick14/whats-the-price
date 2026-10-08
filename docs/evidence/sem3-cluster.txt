@@ -1,0 +1,24 @@
+NAMESPACE            NAME                                                    READY   STATUS    RESTARTS   AGE
+default              pod/postgres-6459fc4bff-swm9n                           1/1     Running   0          30m
+default              pod/what-s-price-f48d68fc6-6vb8m                        1/1     Running   0          3m52s
+default              pod/what-s-price-f48d68fc6-7q9sv                        1/1     Running   0          4m8s
+default              pod/what-s-price-f48d68fc6-lhkz7                        1/1     Running   0          13m
+default              pod/what-s-price-f48d68fc6-m6kqz                        1/1     Running   0          4m8s
+default              pod/what-s-price-f48d68fc6-tj2kz                        1/1     Running   0          3m52s
+default              pod/what-s-price-f48d68fc6-w49wr                        1/1     Running   0          13m
+kube-system          pod/coredns-589f44dc88-dlxmh                            1/1     Running   0          57m
+kube-system          pod/coredns-589f44dc88-plz9f                            1/1     Running   0          57m
+kube-system          pod/etcd-ml-pro-sem3-control-plane                      1/1     Running   0          57m
+kube-system          pod/kindnet-9qwzc                                       1/1     Running   0          57m
+kube-system          pod/kube-apiserver-ml-pro-sem3-control-plane            1/1     Running   0          57m
+kube-system          pod/kube-controller-manager-ml-pro-sem3-control-plane   1/1     Running   0          57m
+kube-system          pod/kube-proxy-9xw75                                    1/1     Running   0          57m
+kube-system          pod/kube-scheduler-ml-pro-sem3-control-plane            1/1     Running   0          57m
+kube-system          pod/metrics-server-55c6b8755f-2dg5f                     1/1     Running   0          56m
+local-path-storage   pod/local-path-provisioner-855c7b7774-d4lsp             1/1     Running   0          57m
+mlops                pod/mlflow-7ccd945d75-lwvrf                             1/1     Running   0          56m
+traefik              pod/traefik-6b44744d6f-wf849                            1/1     Running   0          103s
+
+NAMESPACE   NAME                                     CLASS     HOSTS              ADDRESS   PORTS   AGE
+default     ingress.networking.k8s.io/what-s-price   traefik   price.localhost              80      29m
+mlops       ingress.networking.k8s.io/mlflow         traefik   mlflow.localhost             80      56m

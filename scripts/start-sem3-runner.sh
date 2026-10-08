@@ -2,10 +2,20 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-: "${RUNNER_TOKEN:?Paste a temporary token from GitHub Settings > Actions > Runners}"
+runner_url=https://github.com/Mr-Nick14/whats-the-price
+if [[ -z ${RUNNER_TOKEN:-} ]] && command -v gh >/dev/null \
+  && gh auth status >/dev/null 2>&1; then
+  RUNNER_TOKEN=$(gh api --method POST \
+    repos/Mr-Nick14/whats-the-price/actions/runners/registration-token \
+    --jq .token)
+fi
+if [[ -z ${RUNNER_TOKEN:-} ]]; then
+  read -r -s -p "GitHub runner registration token: " RUNNER_TOKEN
+  echo
+fi
+: "${RUNNER_TOKEN:?Get a temporary token from GitHub Settings > Actions > Runners}"
 
 cluster_name=ml-pro-sem3
-runner_url=https://github.com/Mr-Nick14/whats-the-price
 kubeconfig_path="$(mktemp /private/tmp/sem3-runner-kubeconfig.XXXXXX)"
 trap 'rm -f "$kubeconfig_path"' EXIT
 kind get kubeconfig --name "$cluster_name" > "$kubeconfig_path"
@@ -22,4 +32,4 @@ docker run -d --name gh-runner --network kind --group-add 0 \
 
 trap - EXIT
 echo "Runner container started. Check docker logs gh-runner and GitHub Settings > Actions > Runners."
-echo "Remove $kubeconfig_path after stopping the runner."
+echo "Stop it with bash scripts/stop-sem3-runner.sh."

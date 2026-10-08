@@ -13,3 +13,13 @@ tolerations:
   - key: node-role.kubernetes.io/control-plane
     operator: Exists
     effect: NoSchedule
+updateStrategy:
+  type: Recreate
+# Uvicorn closes idle keep-alive connections after 5s; retire them in Traefik first.
+additionalArguments:
+  - --serverstransport.forwardingtimeouts.idleconntimeout=1s
+accessLog:
+  enabled: true
+  format: json
+  filters:
+    statusCodes: "500-599"

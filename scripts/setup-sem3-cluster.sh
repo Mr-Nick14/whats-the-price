@@ -17,7 +17,7 @@ helm repo add traefik https://traefik.github.io/charts
 helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
 helm repo update
 helm upgrade --install traefik traefik/traefik -n traefik --create-namespace \
-  -f platform/traefik-values.yaml --wait
+  --version 41.7.0 -f platform/traefik-values.yaml --wait
 helm upgrade --install metrics-server metrics-server/metrics-server -n kube-system \
   --version 3.14.0 -f platform/metrics-server-values.yaml --wait
 

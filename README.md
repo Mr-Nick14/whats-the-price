@@ -47,19 +47,20 @@ Desktop и установки `helm` команда `bash scripts/setup-sem3-clu
 Для CI job `deploy` теперь назначен runner с метками `self-hosted` и `kind`.
 Готовый образ в `platform/runner/` содержит `kind`, `kubectl` и `python3`.
 После создания секрета GitHub Actions `DB_PASSWORD` откройте Settings → Actions →
-Runners → New self-hosted runner, скопируйте временный registration token и
-запустите:
+Runners и запустите:
 
 ```bash
-RUNNER_TOKEN='<временный токен>' bash scripts/start-sem3-runner.sh
+bash scripts/start-sem3-runner.sh
 ```
 
-Скрипт запускает runner в Docker-сети `kind`, подключает Docker socket и временный
+Если `gh auth login` уже выполнен, скрипт получит временный registration token
+сам; иначе запросит токен без отображения введённых символов. Затем запустит runner
+в Docker-сети `kind`, подключит Docker socket и временный
 kubeconfig с адресом `ml-pro-sem3-control-plane:6443`. Для работы с внешними
 contributions включите в Settings → Actions → General требование одобрения
-workflow от новых авторов. После проверки остановите контейнер `gh-runner`,
-удалите его в Docker и удалите временный kubeconfig, путь к которому напечатал
-скрипт. Runner также следует удалить в Settings → Actions → Runners.
+workflow от новых авторов. После проверки выполните
+`bash scripts/stop-sem3-runner.sh`: он удалит контейнер `gh-runner` и временный
+kubeconfig. Runner также следует удалить в Settings → Actions → Runners.
 
 Smoke из runner обращается к Ingress через имя control-plane с заголовком
 `Host: price.localhost`. Локально его можно повторить командой

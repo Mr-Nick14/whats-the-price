@@ -89,7 +89,10 @@ jobs:
         run: |
           kubectl get pods -o wide
           kubectl get events --sort-by=.lastTimestamp | tail -40
+          kubectl get configmap what-s-price-config -o yaml || true
           kubectl describe deploy/what-s-price | tail -50
           kubectl describe pods -l app=what-s-price | tail -100
-          kubectl logs -l app=what-s-price --all-containers --tail=50 --prefix || true
-          kubectl logs -l app=what-s-price --all-containers --previous --tail=50 --prefix || true
+          for pod in $(kubectl get pods -l app=what-s-price -o name); do
+            kubectl logs "$pod" --all-containers --tail=50 --prefix || true
+            kubectl logs "$pod" --all-containers --previous --tail=50 --prefix || true
+          done

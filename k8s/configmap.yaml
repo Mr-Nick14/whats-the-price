@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: what-s-price-config
 data:
-  MODEL_PATH: artifacts/missing-model.joblib
+  MODEL_PATH: artifacts/model.joblib

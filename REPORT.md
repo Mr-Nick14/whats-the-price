@@ -85,18 +85,19 @@ PostgreSQL сохраняет запросы к `/v1/predict` со статус�
 | Пункт | Подтверждение |
 | --- | --- |
 | Тесты с PostgreSQL | Локально: 17 passed. [Зелёный прогон PR](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816780514). |
-| Образ в GHCR и deploy в kind | Ожидает запуска на `develop` или `main`. |
+| Образ в GHCR и deploy в kind | [Зелёный прогон после слияния](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37823069898): tests, build, deploy и smoke прошли. [Образ с тегом SHA](https://github.com/Mr-Nick14/whats-the-price/pkgs/container/whats-the-price). |
 | Pull request: красный, затем зелёный | [PR #2](https://github.com/Mr-Nick14/whats-the-price/pull/2): [красный pytest](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816554802), затем [зелёный](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816780514). |
-| Три поломки и исправления | Ожидают отдельных прогонов в Actions. |
+| Три поломки и исправления | [ConfigMap: красный deploy](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37824199334). Исправление и ещё две поломки ожидают прогонов. |
 
 ## Семь вопросов
 
-1. Время первого и второго `build` запишу из логов двух прогонов. Слой `uv sync`
-   после копирования `pyproject.toml` и `uv.lock` может браться из кэша, если
-   зависимости не менялись.
-2. В Deployment сначала указан локальный образ `what-s-price:1.0`. CI сразу
-   меняет его на образ с SHA; старые поды могут остаться с `ImagePullBackOff`,
-   пока новый ReplicaSet успешно проходит rollout. Проверю это по логу deploy.
+1. `build` занял [79 секунд в первом прогоне](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37823069898)
+   и [15 секунд во втором](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37824199334).
+   Зависимости и `uv.lock` не менялись; слой `uv sync` повторно взят из кэша.
+2. В Deployment сначала указан `what-s-price:1.0`. Пока CI меняет образ на
+   тег с SHA, первые поды пытаются скачать несуществующий образ и попадают в
+   `ImagePullBackOff`. В [логе deploy](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37824199334)
+   видны и эти поды, и новый под с образом из GHCR; решает готовность нового.
 3. Пароль вводится в GitHub Actions Secret `DB_PASSWORD`, передаётся шагу
    deploy как переменная и создаёт Kubernetes Secret. Под берёт из него
    `DATABASE_URL`. ConfigMap хранится открытым текстом, поэтому пароль туда
@@ -109,10 +110,11 @@ PostgreSQL сохраняет запросы к `/v1/predict` со статус�
 6. `pg_advisory_xact_lock` сериализует создание таблицы при одновременном
    старте двух реплик API. Без него обе могут одновременно выполнять DDL
    на пустой базе; одна из них рискует не запуститься из-за конфликта.
-7. Ожидаемый порядок: `Pending` при нехватке памяти до планирования на узел,
+7. Порядок: `Pending` при нехватке памяти до планирования на узел,
    `CreateContainerConfigError` при отсутствующем секрете до старта контейнера,
    `CrashLoopBackOff` при неверном пути к модели после повторных падений API.
-   Сверю статусы с тремя красными прогонами.
+   Последний статус подтверждён для модели [красным прогоном](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37824199334);
+   остальные сверю после двух следующих прогонов.
 
 ## Журнал проблем
 
@@ -121,6 +123,6 @@ PostgreSQL сохраняет запросы к `/v1/predict` со статус�
 | Локальные тесты попали в другой PostgreSQL на порту 5432. | Сервер ответил `role "postgres" does not exist`; проверка порта показала второй локальный процесс. | Запустили временную базу на 55432: 17 тестов прошли. |
 | Первый намеренный красный прогон остановился на Ruff. | [Лог](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816390059) указал на неиспользуемый импорт `settings`. | Убрали импорт отдельным коммитом. |
 | После Ruff упал тест `/health`. | В [логе pytest](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816554802) шаг завершился с кодом 1: тест ожидал несуществующий путь к модели. | Вернули ожидание `settings.model_path`; [следующий прогон](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816780514) зелёный. |
+| Неверный путь в ConfigMap остановил deploy. | [Шаг «Сервис»](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37824199334/job/113473075576) ждал rollout 180 секунд; новый под попал в `CrashLoopBackOff`. Диагностика вывела также старые поды с `ImagePullBackOff`, поэтому потеряла лог падающего контейнера. | Путь восстановлен локально; диагностика дополнена логами каждого пода. Зелёный прогон ожидается. |
 
-Ссылки на `build` и `deploy` и их времена добавлю после запуска Actions на
-`develop` или `main`. Три поломки деплоя пока не воспроизводили.
+Ошибки секрета и ресурсов ещё не запускали.

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-ingress_url="http://${KIND_CLUSTER:-ml-pro-sem3}-control-plane"
+ingress_url="${INGRESS_URL:-http://${KIND_CLUSTER:-ml-pro-sem3}-control-plane}"
 host_header='Host: price.localhost'
 
 for _ in $(seq 1 30); do

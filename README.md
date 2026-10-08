@@ -45,12 +45,25 @@ Desktop и установки `helm` команда `bash scripts/setup-sem3-clu
 сервис в режиме реестра не стартует без `champion`.
 
 Для CI job `deploy` теперь назначен runner с метками `self-hosted` и `kind`.
-Он должен работать в Docker-сети `kind`, иметь Docker socket, `kind`, `kubectl`,
-`python3`, `curl`, доступ к kubeconfig кластера `ml-pro-sem3` и секрет GitHub
-`DB_PASSWORD`. Из контейнера runner адрес Kubernetes API в kubeconfig должен
-указывать на `ml-pro-sem3-control-plane:6443`; `localhost` там относится к
-контейнеру runner. Smoke обращается к Ingress через имя control-plane с
-заголовком `Host: price.localhost`.
+Готовый образ в `platform/runner/` содержит `kind`, `kubectl` и `python3`.
+После создания секрета GitHub Actions `DB_PASSWORD` откройте Settings → Actions →
+Runners → New self-hosted runner, скопируйте временный registration token и
+запустите:
+
+```bash
+RUNNER_TOKEN='<временный токен>' bash scripts/start-sem3-runner.sh
+```
+
+Скрипт запускает runner в Docker-сети `kind`, подключает Docker socket и временный
+kubeconfig с адресом `ml-pro-sem3-control-plane:6443`. Для работы с внешними
+contributions включите в Settings → Actions → General требование одобрения
+workflow от новых авторов. После проверки остановите контейнер `gh-runner`,
+удалите его в Docker и удалите временный kubeconfig, путь к которому напечатал
+скрипт. Runner также следует удалить в Settings → Actions → Runners.
+
+Smoke из runner обращается к Ingress через имя control-plane с заголовком
+`Host: price.localhost`. Локально его можно повторить командой
+`INGRESS_URL=http://price.localhost bash scripts/sem3-smoke.sh`.
 
 ## Проверка
 

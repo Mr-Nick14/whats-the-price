@@ -84,9 +84,9 @@ PostgreSQL сохраняет запросы к `/v1/predict` со статус�
 
 | Пункт | Подтверждение |
 | --- | --- |
-| Тесты с PostgreSQL | Локально: 17 passed. Ссылка на Actions появится после push. |
+| Тесты с PostgreSQL | Локально: 17 passed. [Зелёный прогон PR](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816780514). |
 | Образ в GHCR и deploy в kind | Ожидает запуска на `develop` или `main`. |
-| Pull request: красный, затем зелёный | Ожидает отдельной пары коммитов. |
+| Pull request: красный, затем зелёный | [PR #2](https://github.com/Mr-Nick14/whats-the-price/pull/2): [красный pytest](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816554802), затем [зелёный](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816780514). |
 | Три поломки и исправления | Ожидают отдельных прогонов в Actions. |
 
 ## Семь вопросов
@@ -119,7 +119,8 @@ PostgreSQL сохраняет запросы к `/v1/predict` со статус�
 | Что не получилось | Как нашли причину | Как исправили |
 | --- | --- | --- |
 | Локальные тесты попали в другой PostgreSQL на порту 5432. | Сервер ответил `role "postgres" does not exist`; проверка порта показала второй локальный процесс. | Запустили временную базу на 55432: 17 тестов прошли. |
+| Первый намеренный красный прогон остановился на Ruff. | [Лог](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816390059) указал на неиспользуемый импорт `settings`. | Убрали импорт отдельным коммитом. |
+| После Ruff упал тест `/health`. | В [логе pytest](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816554802) шаг завершился с кодом 1: тест ожидал несуществующий путь к модели. | Вернули ожидание `settings.model_path`; [следующий прогон](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816780514) зелёный. |
 
-Ссылки на прогоны и измеренные времена добавлю после запуска Actions. Для
-намеренных поломок нужны настоящие красные и следующие за ними зелёные прогоны;
-результаты заранее не записываю.
+Ссылки на `build` и `deploy` и их времена добавлю после запуска Actions на
+`develop` или `main`. Три поломки деплоя пока не воспроизводили.

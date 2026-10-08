@@ -22,7 +22,7 @@ spec:
             - configMapRef:
                 name: what-s-price-config
             - secretRef:
-                name: what-s-price-secrets
+                name: what-s-price-secret-missing
           startupProbe:
             httpGet:
               path: /health

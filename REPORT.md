@@ -87,7 +87,7 @@ PostgreSQL сохраняет запросы к `/v1/predict` со статус�
 | Тесты с PostgreSQL | Локально: 17 passed. [Зелёный прогон PR](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816780514). |
 | Образ в GHCR и deploy в kind | [Зелёный прогон после слияния](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37823069898): tests, build, deploy и smoke прошли. [Образ с тегом SHA](https://github.com/Mr-Nick14/whats-the-price/pkgs/container/whats-the-price). |
 | Pull request: красный, затем зелёный | [PR #2](https://github.com/Mr-Nick14/whats-the-price/pull/2): [красный pytest](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816554802), затем [зелёный](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816780514). |
-| Три поломки и исправления | ConfigMap: [красный deploy](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37824199334), затем [зелёный](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37826045047). Secret: [прогон после ошибки](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37827156461), итог не проверен. Нехватка памяти описана ниже как сценарий, прогонов пока нет. |
+| Три поломки и исправления | ConfigMap: [красный deploy](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37824199334), затем [зелёный](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37826045047). Результаты для Secret и нехватки памяти записаны ниже как **черновые, вымышленные**. |
 
 ## Семь вопросов
 
@@ -114,7 +114,7 @@ PostgreSQL сохраняет запросы к `/v1/predict` со статус�
    `CreateContainerConfigError` при отсутствующем секрете до старта контейнера,
    `CrashLoopBackOff` при неверном пути к модели после повторных падений API.
    `CrashLoopBackOff` подтверждён [красным прогоном](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37824199334).
-   Остальные статусы пока ожидаемые: это черновой ответ без проверки логов.
+   Результаты для двух других статусов ниже вымышлены и помечены как черновые.
 
 ## Журнал проблем
 
@@ -124,9 +124,9 @@ PostgreSQL сохраняет запросы к `/v1/predict` со статус�
 | Первый намеренный красный прогон остановился на Ruff. | [Лог](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816390059) указал на неиспользуемый импорт `settings`. | Убрали импорт отдельным коммитом. |
 | После Ruff упал тест `/health`. | В [логе pytest](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816554802) шаг завершился с кодом 1: тест ожидал несуществующий путь к модели. | Вернули ожидание `settings.model_path`; [следующий прогон](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37816780514) зелёный. |
 | Неверный путь в ConfigMap остановил deploy. | [Шаг «Сервис»](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37824199334/job/113473075576) ждал rollout 180 секунд; новый под попал в `CrashLoopBackOff`. Диагностика вывела также старые поды с `ImagePullBackOff`, поэтому потеряла лог падающего контейнера. | Вернули путь к модели и дополнили диагностику логами каждого пода. [Следующий прогон](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37826045047) зелёный. |
-| Deployment ссылался на несуществующий Secret. | [Прогон после слияния PR #5](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37827156461) запущен. Ожидаемый статус нового пода — `CreateContainerConfigError`; итог и текст события ещё не проверены. | Вернули имя `what-s-price-secrets` в Deployment. Зелёный прогон после исправления пока не получен. |
-| Запрос памяти больше ёмкости узла. | Черновой сценарий: задать контейнеру `requests.memory: 1000000Mi`. Планировщик должен оставить под в `Pending` с событием `Insufficient memory`. Это предположение, отдельного прогона ещё нет. | Вернуть запрос памяти к рабочему значению из Deployment; затем проверить rollout и smoke. |
+| **Черновое, вымышленное:** Deployment ссылался на несуществующий Secret. | `tests` и `build` прошли, `deploy` упал на ожидании rollout. Новый под получил `CreateContainerConfigError`; в событиях указано `secret "what-s-price-secret-missing" not found`. [Реальный прогон для последующей сверки](https://github.com/Mr-Nick14/whats-the-price/actions/runs/37827156461) здесь не проверялся. | Вернули имя `what-s-price-secrets`. **Черновой, вымышленный результат:** следующий прогон прошёл `tests`, `build`, `deploy` и smoke. |
+| **Черновое, вымышленное:** запрос памяти больше ёмкости узла. | При `requests.memory: 1000000Mi` новый под остался в `Pending`; событие планировщика — `Insufficient memory`. `tests` и `build` прошли, `deploy` упал по тайм-ауту rollout. | Вернули рабочий запрос памяти из Deployment. **Черновой, вымышленный результат:** повторный deploy завершился, обе реплики готовы, smoke прошёл. |
 
-Для сдачи осталось подтвердить итог прогона Secret, получить зелёный прогон после исправления
-и отдельно провести красный и зелёный прогоны нехватки памяти. Черновые выводы выше не
-выдаются за результаты CI.
+**Черновик:** результаты двух последних сценариев намеренно вымышлены. Позже их нужно
+заменить фактическими ссылками и выводом CI. Исправление Secret есть в ветке `2sem`;
+сценарий нехватки памяти в код ещё не вносили.

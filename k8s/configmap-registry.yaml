@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: what-s-price-config
+data:
+  MODEL_NAME: what-s-price
+  MODEL_ALIAS: champion
+  MLFLOW_TRACKING_URI: http://mlflow.mlops:5000

@@ -90,7 +90,7 @@ def load_registered_model(name: str, alias: str) -> tuple[Any, dict[str, Any]]:
         mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
     client = MlflowClient()
     version = client.get_model_version_by_alias(name, alias)
-    model = mlflow.pyfunc.load_model(f"models:/{name}@{alias}")
+    model = mlflow.pyfunc.load_model(f"models:/{name}/{version.version}")
     metadata = dict(model.metadata.metadata or {})
     metadata["model_version"] = str(version.version)
     validate_model_metadata(metadata)
@@ -101,7 +101,7 @@ def load_registered_model(name: str, alias: str) -> tuple[Any, dict[str, Any]]:
 async def lifespan(app: FastAPI):
     if settings.model_name:
         pipeline, metadata = load_registered_model(settings.model_name, settings.model_alias)
-        model_source = f"models:/{settings.model_name}@{settings.model_alias}"
+        model_source = f"models:/{settings.model_name}/{metadata['model_version']}"
     else:
         pipeline, metadata = load_model_bundle(Path(settings.model_path))
         model_source = settings.model_path

@@ -38,6 +38,20 @@ PYTHONPATH=src uv run python scripts/train.py --data-path data/used_cars_sample.
 `champion` переходит на неё, если MAE улучшился минимум на 100 долларов; первая
 версия становится `champion` без сравнения.
 
+Файлы локальной платформы лежат в `platform/` и `k8s/`. После запуска Docker
+Desktop и установки `helm` команда `bash scripts/setup-sem3-cluster.sh` создаёт
+отдельный кластер `ml-pro-sem3` с портом 80, ставит Traefik и metrics-server,
+разворачивает MLflow. Затем нужно обучить хотя бы одну модель в этом MLflow:
+сервис в режиме реестра не стартует без `champion`.
+
+Для CI job `deploy` теперь назначен runner с метками `self-hosted` и `kind`.
+Он должен работать в Docker-сети `kind`, иметь Docker socket, `kind`, `kubectl`,
+`python3`, `curl`, доступ к kubeconfig кластера `ml-pro-sem3` и секрет GitHub
+`DB_PASSWORD`. Из контейнера runner адрес Kubernetes API в kubeconfig должен
+указывать на `ml-pro-sem3-control-plane:6443`; `localhost` там относится к
+контейнеру runner. Smoke обращается к Ingress через имя control-plane с
+заголовком `Host: price.localhost`.
+
 ## Проверка
 
 Нужны `uv`, Docker, `kind`, `kubectl` и `curl`. Из корня репозитория выполните три команды.

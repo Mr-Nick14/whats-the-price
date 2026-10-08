@@ -1,0 +1,15 @@
+service:
+  type: ClusterIP
+ports:
+  web:
+    port: 8000
+    hostPort: 80
+  websecure:
+    expose:
+      default: false
+nodeSelector:
+  ingress-ready: "true"
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule

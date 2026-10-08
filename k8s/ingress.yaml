@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: what-s-price
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: price.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: what-s-price
+                port:
+                  number: 80

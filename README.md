@@ -25,3 +25,15 @@ Compose запускает API и PostgreSQL. Таблица `predictions` хр�
 
 Дополнительные задания включают пакетный прогноз до 1000 машин и нагрузочный тест Locust.
 Результаты и скриншоты находятся в [отчёте](REPORT.md).
+
+## CI для ДЗ2
+
+Pull request запускает `ruff` и `pytest` с PostgreSQL. Push в `develop` или `main`
+также собирает образ с тегом `sha-<commit>` в GHCR и проверяет его в `kind`.
+Для деплоя нужен секрет репозитория `DB_PASSWORD`:
+GitHub → Settings → Secrets and variables → Actions. Используйте пароль без
+символов, требующих кодирования в URL.
+
+`/health` показывает путь к модели из ConfigMap. CI smoke проверяет этот путь,
+диапазон цены для `good.json` и запись запроса в PostgreSQL. Ссылки на прогоны
+и разбор ошибок будут в [отчёте](REPORT.md).

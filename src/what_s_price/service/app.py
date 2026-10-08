@@ -147,6 +147,7 @@ def health(request: Request) -> dict[str, str]:
     return {
         "status": "ok",
         "model_version": getattr(request.app.state, "version", "unknown"),
+        "model_path": settings.model_path,
     }
 
 

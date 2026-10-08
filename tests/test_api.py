@@ -3,13 +3,18 @@
 from fastapi.testclient import TestClient
 
 from what_s_price import db
+from what_s_price.config import settings
 from what_s_price.service.app import app
 
 
 def test_health(client) -> None:
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "model_version": "0.1.0"}
+    assert response.json() == {
+        "status": "ok",
+        "model_version": "0.1.0",
+        "model_path": settings.model_path,
+    }
 
 
 def test_ready(client) -> None:

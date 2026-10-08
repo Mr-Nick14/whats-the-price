@@ -1,0 +1,5 @@
+outs:
+- md5: a76a78fbbe1ea060f4c2a1e6b926c2ac
+  size: 26906514
+  hash: md5
+  path: used_cars_sample.csv

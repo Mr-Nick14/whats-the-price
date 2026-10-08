@@ -16,6 +16,8 @@ __pycache__/
 used_cars_data.csv
 artifacts/*
 !artifacts/model.joblib
+mlruns/
+mlflow.db
 
 # Coverage and build outputs
 .coverage

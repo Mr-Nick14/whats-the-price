@@ -68,20 +68,47 @@ def load_model_bundle(path: Path) -> tuple[Any, dict[str, Any]]:
     pipeline, metadata = bundle["pipeline"], bundle["metadata"]
     if not hasattr(pipeline, "predict") or not isinstance(metadata, dict):
         raise ValueError("Model artifact has an invalid pipeline or metadata")
+    validate_model_metadata(metadata)
+
+    return pipeline, metadata
+
+
+def validate_model_metadata(metadata: dict[str, Any]) -> None:
+    """Не запускать API с моделью для другого набора или порядка признаков."""
     if not {"input_features", "model_version"} <= metadata.keys():
         raise ValueError("Model metadata is missing input_features or model_version")
     if list(metadata["input_features"]) != list(Features.model_fields):
         raise ValueError("API schema does not match the model artifact feature order")
 
-    return pipeline, metadata
+
+def load_registered_model(name: str, alias: str) -> tuple[Any, dict[str, Any]]:
+    """Загрузить закреплённую версию из MLflow при запуске пода."""
+    import mlflow
+    from mlflow import MlflowClient
+
+    if settings.mlflow_tracking_uri:
+        mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
+    client = MlflowClient()
+    version = client.get_model_version_by_alias(name, alias)
+    model = mlflow.pyfunc.load_model(f"models:/{name}@{alias}")
+    metadata = dict(model.metadata.metadata or {})
+    metadata["model_version"] = str(version.version)
+    validate_model_metadata(metadata)
+    return model, metadata
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    pipeline, metadata = load_model_bundle(Path(settings.model_path))
+    if settings.model_name:
+        pipeline, metadata = load_registered_model(settings.model_name, settings.model_alias)
+        model_source = f"models:/{settings.model_name}@{settings.model_alias}"
+    else:
+        pipeline, metadata = load_model_bundle(Path(settings.model_path))
+        model_source = settings.model_path
     app.state.pipeline = pipeline
     app.state.meta = metadata
     app.state.version = metadata["model_version"]
+    app.state.model_source = model_source
     db.init()
     try:
         yield
@@ -147,7 +174,7 @@ def health(request: Request) -> dict[str, str]:
     return {
         "status": "ok",
         "model_version": getattr(request.app.state, "version", "unknown"),
-        "model_path": settings.model_path,
+        "model_path": getattr(request.app.state, "model_source", settings.model_path),
     }
 
 
